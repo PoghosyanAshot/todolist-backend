@@ -25,19 +25,12 @@ const todoValidation = {
                 .trim()
                 .max(LIMITS.TODO.DESCRIPTION_MAX_LENGTH)
                 .pattern(REGEX.NO_HTML_TAGS)
-                .allow("") 
+                .allow("")
                 .optional()
                 .messages({
                     [JOI_KEYS.MAX]:
                         MESSAGES.VALIDATION.TODO.DESCRIPTION_MAX_LENGTH,
                     [JOI_KEYS.PATTERN]: MESSAGES.VALIDATION.TODO.NO_HTML_TAGS,
-                }),
-
-            completed: Joi.boolean()
-                .optional()
-                .messages({
-                    [JOI_KEYS.BASE]:
-                        MESSAGES.VALIDATION.TODO.IS_COMPLETED_BOOLEAN,
                 }),
         }),
     },

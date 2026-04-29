@@ -1,0 +1,605 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "To-Do API Documentation",
+        "version": "1.0.0",
+        "description": "API documentation for Authentication, User Profile, and To-Do management."
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3001",
+            "description": "Local Development Server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "User": {
+                "type": "object",
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "example": "65ab1c23d4e5f6g7h8i9j0k1"
+                    },
+                    "username": { "type": "string", "example": "crazyBob999" },
+                    "email": { "type": "string", "example": "bob@example.com" },
+                    "password": { "type": "string", "example": "Bob123345" },
+                    "createdAt": { "type": "string", "format": "date-time" },
+                    "updatedAt": { "type": "string", "format": "date-time" }
+                }
+            },
+            "PopulatedUser": {
+                "type": "object",
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "example": "65ab1c23d4e5f6g7h8i9j0k1"
+                    },
+                    "username": { "type": "string", "example": "crazyBob999" },
+                    "email": { "type": "string", "example": "bob@example.com" }
+                }
+            },
+            "Todo": {
+                "type": "object",
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "example": "65ab1c23d4e5f6g7h8i9j0k2"
+                    },
+                    "title": { "type": "string", "example": "Buy groceries" },
+                    "description": {
+                        "type": "string",
+                        "example": "Milk, eggs, and bread."
+                    },
+                    "completed": { "type": "boolean", "example": false },
+                    "createdBy": {
+                        "$ref": "#/components/schemas/PopulatedUser"
+                    },
+                    "createdAt": { "type": "string", "format": "date-time" },
+                    "updatedAt": { "type": "string", "format": "date-time" }
+                }
+            }
+        }
+    },
+    "tags": [
+        { "name": "Auth", "description": "Authentication endpoints" },
+        { "name": "Users", "description": "User profile management" },
+        { "name": "Todos", "description": "To-Do list management" }
+    ],
+    "paths": {
+        "/api/auth/register": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Register a new user",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "crazyBob999"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "bob@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "SecretPass123!"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_AUTH_REGISTER"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User registered successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "newUser": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Login user",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "bob@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "SecretPass123!"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful. Returns access token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_AUTH_LOGIN"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "accessToken": {
+                                                    "type": "string",
+                                                    "example": "eyJhbGciOiJIUzI1NiIsInR..."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Logout user",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "204": { "description": "Logout successful" }
+                }
+            }
+        },
+        "/api/auth/refresh-token": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Refresh access token",
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_AUTH_LOGIN"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token refreshed successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "accessToken": {
+                                                    "type": "string",
+                                                    "example": "eyJhbGciOiJIUzI1NiIsInR..."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/me": {
+            "get": {
+                "tags": ["Users"],
+                "summary": "Get current user profile",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "200": {
+                        "description": "User profile retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_GENERAL"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Operation completed successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["Users"],
+                "summary": "Update user profile",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "username": { "type": "string" },
+                                    "email": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_GENERAL"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Operation completed successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "updatedUser": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Users"],
+                "summary": "Delete user account",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "204": { "description": "User deleted successfully" }
+                }
+            }
+        },
+        "/api/users/password": {
+            "patch": {
+                "tags": ["Users"],
+                "summary": "Update user password",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "oldPassword": { "type": "string" },
+                                    "newPassword": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_GENERAL"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Operation completed successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "updatedUser": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/todos/me": {
+            "get": {
+                "tags": ["Todos"],
+                "summary": "Get all todos for current user",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "200": {
+                        "description": "Todos retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_TODO_FETCHED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "To-Do items retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "todos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Todo"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Todos"],
+                "summary": "Create a new todo",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Learn Swagger"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Understand how to write beautiful API docs."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Todo created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_TODO_CREATED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "To-Do item created successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "todo": {
+                                                    "$ref": "#/components/schemas/Todo"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/todos/me/{id}": {
+            "get": {
+                "tags": ["Todos"],
+                "summary": "Get a specific todo by ID",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Todo ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Todo retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_TODO_FETCHED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "To-Do item retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "todo": {
+                                                    "$ref": "#/components/schemas/Todo"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["Todos"],
+                "summary": "Update a specific todo",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Todo ID"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "title": { "type": "string" },
+                                    "description": { "type": "string" },
+                                    "completed": { "type": "boolean" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Todo updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUCCESS_TODO_UPDATED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "To-Do item updated successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "updatedTodo": {
+                                                    "$ref": "#/components/schemas/Todo"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Todos"],
+                "summary": "Delete a specific todo",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Todo ID"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Todo deleted successfully"
+                    }
+                }
+            }
+        }
+    }
+}
